@@ -1,0 +1,131 @@
+version: '3'
+
+networks:
+  local-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.60.0.0/16
+    
+services:
+
+  rest-api:
+    build: ./rest-api
+    container_name: url_rest_api
+    restart: always
+    ports:
+      - '3001:3001'
+    volumes:
+      - ./rest-api/:/app
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      REDIS_HOSTS: 10.60.0.11,10.60.0.12,10.60.0.13,10.60.0.14,10.60.0.15,10.60.0.16
+      REDIS_PORTS: 8001,8002,8003,8004,8005,8006
+      REDIS_STRATEGY: cluster
+      HOST_URL: http://short.est
+      MORGAN_LOG: dev
+    command: npm run dev
+    networks:
+      local-net:
+        ipv4_address: 10.60.0.10
+    depends_on:
+      - redis-1
+
+  redis-1:
+    build: ./redis
+    restart: unless-stopped
+    container_name: url_redis_1
+    # command: ["redis-server", "--appendonly", "yes", "--cluster-enabled", "yes", "--cluster-config-file", "nodes.conf", "--cluster-node-timeout", "5000", "--port", "8001"]
+    volumes:
+      - redis-data-1:/data
+    ports:
+      - 8001:8001
+    expose:
+      - 8001
+    depends_on:
+      - redis-2
+      - redis-3
+      - redis-4
+      - redis-5
+      - redis-6
+    networks:
+      local-net:
+        ipv4_address: 10.60.0.11
+
+  redis-2:
+    image: redis:latest
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--cluster-enabled", "yes", "--cluster-config-file", "nodes.conf", "--cluster-node-timeout", "5000", "--port", "8002"]
+    volumes:
+      - redis-data-2:/data
+    ports:
+      - 8002:8002
+    expose:
+      - 8002
+    networks:
+      local-net:
+        ipv4_address: 10.60.0.12
+
+  redis-3:
+    image: redis:latest
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--cluster-enabled", "yes", "--cluster-config-file", "nodes.conf", "--cluster-node-timeout", "5000", "--port", "8003"]
+    volumes:
+      - redis-data-3:/data
+    ports:
+      - 8003:8003
+    expose:
+      - 8003
+    networks:
+      local-net:
+        ipv4_address: 10.60.0.13
+
+  redis-4:
+    image: redis:latest
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--cluster-enabled", "yes", "--cluster-config-file", "nodes.conf", "--cluster-node-timeout", "5000", "--port", "8004"]
+    volumes:
+      - redis-data-4:/data
+    ports:
+      - 8004:8004
+    expose:
+      - 8004
+    networks:
+      local-net:
+        ipv4_address: 10.60.0.14
+
+  redis-5:
+    image: redis:latest
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--cluster-enabled", "yes", "--cluster-config-file", "nodes.conf", "--cluster-node-timeout", "5000", "--port", "8005"]
+    volumes:
+      - redis-data-5:/data
+    ports:
+      - 8005:8005
+    expose:
+      - 8005
+    networks:
+      local-net:
+        ipv4_address: 10.60.0.15
+
+  redis-6:
+    image: redis:latest
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--cluster-enabled", "yes", "--cluster-config-file", "nodes.conf", "--cluster-node-timeout", "5000", "--port", "8006"]
+    volumes:
+      - redis-data-6:/data
+    ports:
+      - 8006:8006
+    expose:
+      - 8006
+    networks:
+      local-net:
+        ipv4_address: 10.60.0.16
+volumes:
+  redis-data-1:
+  redis-data-2:
+  redis-data-3:
+  redis-data-4:
+  redis-data-5:
+  redis-data-6:
